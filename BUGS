@@ -1,0 +1,3 @@
+- order of output PDF is not optimal, cannot be configured
+- font size is often too small
+- dead links to nonexisting wiki pages aren't ignored (WONTFIX)
