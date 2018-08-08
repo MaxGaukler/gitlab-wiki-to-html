@@ -12,7 +12,14 @@ wget --rejected-log=rejected-urls.log --header "Cookie: _gitlab_session=$4" -r -
 for i in */assets/*.css; do cat "$scriptdir"/remove-dynamic-content.css >> $i; done
 # TODO: strip trailing / from $2.
 # fixup lazy-loaded images (src="data:image-gif..." class="lazy" data-src="/user/project/uploads/.../source.png' for uploads,   or data-src="./source.png" for images inside wiki-git)
-find -type f \( -name '*.html' -o -name '*.1' -o -not -name '*.*' \) -exec sed 's/src="data:image\/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="//g;s| data-src="'/$2/'| src="../../|g;s| data-src="| src="|g' -i '{}' ';'
+# TODO: "../../" is not correct, depending on the directory depth.
+
+# TODO something is wrong, this isn't run:
+for depth in $(seq 1 100); do
+    path_to_top=$(for i in $(seq 1 $(($depth-4))); do echo -n "../"; done)
+    # TODO BUG: wikipages accidentaly named "something.txt" are excluded from this transformation (same for the copied regexp some lines below)
+    find -maxdepth $depth -mindepth $depth -type f \( -name '*.html' -o -name '*.1' -o -not -regex ".*\.[a-z][a-z][a-z]?" \) -exec sed 's/src="data:image\/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="//g;s| data-src="'/$2/'| src="'$path_to_top'|g;s| data-src="| src="|g' -i '{}' ';'
+done
 
 xdg-open */$2/wikis/index.html
 
@@ -25,7 +32,7 @@ cd temp-for-pdf
 
 # work around a few bugs where gitlab doesn't enforce canonic URLs:
 # force ending as .html, force filename as lowercase (except files already ending in .html), "-" is equal to " "
-find -type f \( -name '*.1' -o -not -name '*.*' \)  -execdir cp '{}'  '{}.copy.html' ';' -execdir rename -f 'y/A-Z\-/a-z /' '{}.copy.html' ';'
+find -type f \( -name '*.1' -o -not -regex ".*\.[a-z][a-z][a-z]?" \)  -execdir cp '{}'  '{}.copy.html' ';' -execdir rename -f 'y/A-Z\-/a-z /' '{}.copy.html' ';'
 
 # deduplication: x.1 == x/index.html
 for dir in $(find -mindepth 1 -type d); do
