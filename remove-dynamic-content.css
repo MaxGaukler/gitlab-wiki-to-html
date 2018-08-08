@@ -1,0 +1,15 @@
+.title-container, .header-content, .navbar, .nav-sidebar, .alert-wrapper, .nav-controls, .wiki-sidebar-header {display:none !important}
+.page-with-contextual-sidebar {padding-left:0 !important}
+
+/*@media print {  
+  @page {
+    size: 297mm 210mm; 
+    margin: 25mm;
+    margin-right: 45mm;
+  }
+}*/
+
+/* images mustn't be wider than the page */
+.content img {
+    max-width: 100%;
+}
